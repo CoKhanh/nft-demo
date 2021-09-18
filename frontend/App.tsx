@@ -12,13 +12,26 @@ const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   // eslint-disable-next-line react-native/no-color-literals
   white: { backgroundColor: 'white' },
+  button: {
+    borderRadius: 4,
+    padding: 11,
+    marginBottom: 10
+  },
+  text: {
+    color: "white"
+  },
+  alignCenter: {
+    textAlign: "center",
+    marginBottom: 10
+  }
 });
 
 function App(): JSX.Element {
   const connector = useWalletConnect();
 
+  //get metamask account
   const accounts = connector.accounts;
-  const [message, setMessage] = React.useState<string>('Loading...');
+  //smart contract instance
   const [smObj, setSmObj] = React.useState(null);
   const web3 = new Web3(
     new Web3.providers.HttpProvider(
@@ -27,6 +40,7 @@ function App(): JSX.Element {
   );
 
   React.useEffect(() => {
+    //smart contract instance
     const SmartContractObj = new web3.eth.Contract(
       SmartContract.abi,
       // NetworkData.address
@@ -67,21 +81,29 @@ function App(): JSX.Element {
       .catch((error) => console.log(error.message));
   }, [connector]);
 
+  const killSession = async () => {
+    await connector.killSession();
+    console.log('Disconnected');
+  }
+
   return (
     <View style={[StyleSheet.absoluteFill, styles.center, styles.white]}>
-      <Text testID="tid-message">{message}</Text>
       {!connector.connected && (
-        <TouchableOpacity onPress={connectWallet}>
+        <TouchableOpacity style={[styles.button, {backgroundColor: "#1FC7D4"}]} onPress={connectWallet}>
           <Text>Connect a Wallet</Text>
         </TouchableOpacity>
       )}
       {!!connector.connected && (
         <>
-          <TouchableOpacity onPress={() => mintNFTs(1)}>
-            <Text>Mint 1 NFT</Text>
+          <Text style={styles.alignCenter}>Connected address: {accounts[0]}</Text>
+          <TouchableOpacity style={[styles.button, {backgroundColor: "#3366CC"}]} onPress={() => mintNFTs(1)}>
+            <Text style={styles.text}>Mint 1 NFT</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => mintNFTs(3)}>
-            <Text>Mint 3 NFT</Text>
+          <TouchableOpacity style={[styles.button, {backgroundColor: "#ED8306"}]} onPress={() => mintNFTs(3)}>
+            <Text style={styles.text}>Mint 3 NFT</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, {backgroundColor: "#FF0100"}]} onPress={killSession}>
+            <Text style={styles.text}>Kill session</Text>
           </TouchableOpacity>
         </>
       )}
